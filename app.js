@@ -1,14 +1,5 @@
-/**
- * This is an example of a basic node.js script that performs
- * the Authorization Code oAuth2 flow to authenticate against
- * the Spotify Accounts.
- *
- * For more information, read
- * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
- */
-
-const express = require('express'); // Express web server framework
-const request = require('request'); // "Request" library
+const express = require('express');
+const request = require('request');
 const cors = require('cors');
 const querystring = require('querystring');
 const cookieParser = require('cookie-parser');
@@ -18,11 +9,6 @@ const client_id = process.env.CLIENT_ID;
 const client_secret = process.env.CLIENT_SECRET;
 const redirect_uri = process.env.REDIRECT_URI;
 
-/**
- * Generates a random string containing numbers and letters
- * @param  {number} length The length of the string
- * @return {string} The generated string
- */
 const generateRandomString = function (length) {
     let text = '';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -46,7 +32,6 @@ app.get('/login', function (req, res) {
     const state = generateRandomString(16);
     res.cookie(stateKey, state);
 
-    // your application requests authorization
     const scope = 'user-library-modify';
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
@@ -59,10 +44,6 @@ app.get('/login', function (req, res) {
 });
 
 app.get('/callback', function (req, res) {
-
-    // your application requests refresh and access tokens
-    // after checking the state parameter
-
     const code = req.query.code || null;
     const state = req.query.state || null;
     const storedState = req.cookies ? req.cookies[stateKey] : null;
@@ -99,12 +80,10 @@ app.get('/callback', function (req, res) {
                     json: true
                 };
 
-                // use the access token to access the Spotify Web API
                 request.get(options, function (error, response, body) {
                     // get all the tracks in the playlist
                     const album_ids = body.tracks.items.map(track => track.track.album.id);
                     // set album as saved for the current user
-
                     const options = {
                         url: `https://api.spotify.com/v1/me/albums` + '?' + querystring.stringify({ids: album_ids.join(',')}),
                         headers: {
@@ -140,7 +119,6 @@ app.get('/callback', function (req, res) {
 });
 
 app.get('/refresh_token', function (req, res) {
-
     // requesting access token from refresh token
     const refresh_token = req.query.refresh_token;
     const authOptions = {
